@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">SecretDocs</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_reenter_password">Reenter Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">Email Id or password incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="signup_suggestion">Click here to sign up.</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="sign_up">Sign Up</string>
+    <string name="password_dont_match">Password does not Match</string>
+    <string name="fit_image_to_scan">Fit image to scan</string>
+    <string name="title_activity_main_page">MainPage</string>
+    <string name="custom_document">customDoc</string>\
+    <string name="load_document">Select Document</string>
+        <string-array name="access_levels">
+            <item>1</item>
+            <item>2</item>
+            <item>3</item>
+        </string-array>
+</resources>
