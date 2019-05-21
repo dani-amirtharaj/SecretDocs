@@ -2,7 +2,6 @@ package com.ub700.securedocs;
 
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -19,6 +18,7 @@ import com.google.ar.sceneform.ux.FootprintSelectionVisualizer;
 import com.google.ar.sceneform.ux.TransformableNode;
 import com.google.ar.sceneform.ux.TransformationSystem;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
@@ -40,15 +40,15 @@ public class AugmentedImageNode extends AnchorNode {
     private TransformationSystem transformationSystem;
     private ViewRenderable img;
 
-    public AugmentedImageNode(Context context, TransformationSystem transformationSystem, int imageIndex, int accessLevel) {
+    public AugmentedImageNode(Context context, TransformationSystem transformationSystem, String augmentedImage, int accessLevel) {
         // Upon construction, start loading the models for the corners of the frame.
         if (secret == null) {
-
+            String[] imageParams = augmentedImage.split(":");
             imgView = new ImageView(context);
-            if (imageIndex < accessLevel) {
-                imgView.setImageBitmap(loadImageBitmap(context.getAssets(), imageIndex + 1));
+            if (Integer.parseInt(imageParams[1]) <= accessLevel) {
+                imgView.setImageBitmap(loadImageBitmap(context, imageParams[2]));
             } else {
-                imgView.setImageBitmap(loadImageBitmap(context.getAssets(), 0));
+                imgView.setImageBitmap(loadImageBitmap(context, "default"));
             }
             secret = ViewRenderable.builder()
                     .setView(context, imgView)
@@ -56,7 +56,6 @@ public class AugmentedImageNode extends AnchorNode {
                     .setSizer(new FixedHeightViewSizer((float) 0.4))
                     .build();
             this.transformationSystem = transformationSystem;
-
         }
     }
 
@@ -87,7 +86,6 @@ public class AugmentedImageNode extends AnchorNode {
             // Set the anchor based on the center of the image.
             setAnchor(image.createAnchor(image.getCenterPose()));
             TransformableNode andy = new TransformableNode(this.transformationSystem);
-
             andy.setParent(this);
             Node node = new Node();
             node.setParent(andy);
@@ -96,16 +94,22 @@ public class AugmentedImageNode extends AnchorNode {
             transformationSystem.setSelectionVisualizer(new FootprintSelectionVisualizer());
             andy.select();
             node.getRenderable().setShadowCaster(false);
-
         }
     }
 
-    public AugmentedImage getImage() {
-        return image;
-    }
-    private Bitmap loadImageBitmap(AssetManager assetManager, int imageIndex) {
-        try (InputStream is = assetManager.open("RenderImages/doc"+imageIndex+".png")) {
-            return BitmapFactory.decodeStream(is);
+    private Bitmap loadImageBitmap(Context context, String document) {
+        Log.e(TAG, "Loading document :"+document);
+        if (document.equals("default")) {
+            Log.e(TAG, "Loading default");
+            try (InputStream is = context.getAssets().open("RenderImages/doc0.png")) {
+                return BitmapFactory.decodeStream(is);
+            } catch (IOException e) {
+                Log.e(TAG, "IO exception loading augmented image bitmap.", e);
+            }
+        }
+        try (FileInputStream inputStream = context.openFileInput(context.getString(R.string.document_view) + ":" + document)) {
+            Log.e(TAG, "Loading original");
+            return BitmapFactory.decodeStream(inputStream);
         } catch (IOException e) {
             Log.e(TAG, "IO exception loading augmented image bitmap.", e);
         }

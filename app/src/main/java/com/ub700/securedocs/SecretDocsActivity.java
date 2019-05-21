@@ -9,12 +9,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import com.google.ar.core.AugmentedImage;
 import com.google.ar.core.Frame;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.FrameTime;
-
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformationSystem;
 
@@ -71,7 +69,6 @@ import androidx.appcompat.app.AppCompatActivity;
             Collection<AugmentedImage> updatedAugmentedImages =
                     frame.getUpdatedTrackables(AugmentedImage.class);
             for (AugmentedImage augmentedImage : updatedAugmentedImages) {
-//                if (augmentedImage.getIndex() < accessLevel) {
                     switch (augmentedImage.getTrackingState()) {
                         case PAUSED:
                             // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
@@ -84,7 +81,7 @@ import androidx.appcompat.app.AppCompatActivity;
                             // Create a new anchor for newly found images.
                             if (!augmentedImageMap.containsKey(augmentedImage)) {
                                 transformationSystem = arFragment.getTransformationSystem();
-                                AugmentedImageNode node = new AugmentedImageNode(this, transformationSystem, augmentedImage.getIndex(), accessLevel);
+                                AugmentedImageNode node = new AugmentedImageNode(this, transformationSystem, augmentedImage.getName(), accessLevel);
                                 node.setImage(augmentedImage);
                                 augmentedImageMap.put(augmentedImage, node);
                                 arFragment.getArSceneView().getScene().addChild(node);
@@ -96,7 +93,6 @@ import androidx.appcompat.app.AppCompatActivity;
                             if (remNode != null) {
                                 arFragment.getArSceneView().getScene().removeChild(remNode);
                                 remNode.getAnchor().detach();
-                                remNode = null;
                             }
                             augmentedImageMap.remove(augmentedImage);
                             break;

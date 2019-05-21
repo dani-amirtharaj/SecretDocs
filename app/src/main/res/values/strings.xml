@@ -17,12 +17,21 @@
     <string name="sign_up">Sign Up</string>
     <string name="password_dont_match">Password does not Match</string>
     <string name="fit_image_to_scan">Fit image to scan</string>
-    <string name="title_activity_main_page">MainPage</string>
-    <string name="custom_document">customDoc</string>\
-    <string name="load_document">Select Document</string>
-        <string-array name="access_levels">
-            <item>1</item>
-            <item>2</item>
-            <item>3</item>
-        </string-array>
+    <string name="title_activity_upload_docs">Menu</string>
+    <string name="custom_document">customDoc</string>
+    <string name="document_view">docView</string>
+    <string name="select_document">Select Document</string>
+    <string name="access_level">Choose access level</string>
+    <string name="upload_document">Upload</string>
+    <string name="upload_document_full">Upload Document</string>
+    <string name="upload_success">File uploaded successfully!</string>
+    <string name="send_email">Send Email</string>
+    <string name="view_docs">View Document</string>
+    <string name="again">Upload Another</string>
+    <string name="default_string">Default</string>
+    <string-array name="access_levels">
+        <item>Level 1</item>
+        <item>Level 2</item>
+        <item>Level 3</item>
+    </string-array>
 </resources>

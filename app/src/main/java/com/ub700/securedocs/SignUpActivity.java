@@ -8,18 +8,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -29,10 +26,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,15 +57,20 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
     private EditText mRePasswordView;
     private View mProgressView;
     private View msignupFormView;
+    private String accessSelection;
+    private Spinner mSpinnerView;
+
+    private static final String SIGNUP_REDO = "Again";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
         // Set up the signup form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
-        if (getIntent().getExtras().getInt("Again") == 1) {
+        if (getIntent().getExtras().getInt(SIGNUP_REDO) == 1) {
             Toast toast =
                     Toast.makeText(this, "User name already exists!", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.TOP, 0, 250);
@@ -93,6 +97,24 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
                 attemptsignup();
             }
         });
+
+        mSpinnerView = (Spinner) findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.access_levels, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerView.setAdapter(adapter);
+        mSpinnerView.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                accessSelection = (String) parent.getItemAtPosition(pos);
+                accessSelection = accessSelection.substring(6);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }});
 
         msignupFormView = findViewById(R.id.signup_form);
         mProgressView = findViewById(R.id.signup_progress);
@@ -201,7 +223,6 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
             cancel = true;
         }
 
-
         if (cancel) {
             // There was an error; don't attempt signup and focus the first
             // form field with an error.
@@ -211,19 +232,17 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
             // perform the user signup attempt.
             showProgress(true);
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("Credentials", email+":"+password+":"+"1");
+            resultIntent.putExtra("Credentials", email+":"+password+":"+accessSelection);
             setResult(Activity.RESULT_OK, resultIntent);
             finish();
         }
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -314,7 +333,6 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 }
 

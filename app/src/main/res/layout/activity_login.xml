@@ -87,7 +87,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
                 android:text="@string/signup_suggestion"
-                android:textColorLink="@color/design_default_color_primary_dark" />
+                android:textColorLink="@color/colorPrimaryDark" />
 
         </LinearLayout>
     </ScrollView>

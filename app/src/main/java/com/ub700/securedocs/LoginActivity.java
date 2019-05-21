@@ -3,23 +3,22 @@ package com.ub700.securedocs;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -38,7 +37,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -54,12 +52,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private List<String> DUMMY_CREDENTIALS = new ArrayList<String>(
-            Arrays.asList( "stevko@buffalo.edu:Buffalo18:2", "damirtha@buffalo.edu:Buffalo19:3" ));
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
@@ -70,12 +62,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private TextView mSignUp;
+
     private static final int REQUEST_SIGNUP = 0;
+    private static final String CREDENTIALS_STRING = "Credentials";
+    private static final String ACCESS_STRING = "Access";
+    private static final String EMAIL_STRING = "Email";
+    private static final String SIGNUP_REDO = "Again";
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -86,10 +85,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View v) {
                 // Start the Signup activity
                 Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
-                intent.putExtra("Again", 0);
+                intent.putExtra(SIGNUP_REDO, 0);
                 startActivityForResult(intent, REQUEST_SIGNUP);
             }
         });
+
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -113,14 +113,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
     }
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
             return;
         }
-
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -217,12 +216,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -287,7 +284,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
         addEmailsToAutoComplete(emails);
     }
 
@@ -305,7 +301,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
-
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -313,7 +308,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
     /**
@@ -332,13 +326,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Integer doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if ((pieces[0].equals(mEmail)) && pieces[1].equals(mPassword)) {
-                    // Account exists, return true if the password matches.
-                    return Integer.valueOf(pieces[2]);
+            // Return the access level if the User name and password are valid.
+            String[] credentials = sharedPref.getString(mEmail, getString(R.string.default_string)).split(":");
+            if (!credentials[0].equals(getString(R.string.default_string))) {
+                if (credentials[0].equals(mPassword)) {
+                    return Integer.valueOf(credentials[1]);
                 }
             }
             return 0;
@@ -348,12 +340,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Integer accessLevel) {
             mAuthTask = null;
             showProgress(false);
+            // If authentication successful, start next activity.
             if (accessLevel > 0) {
-                Intent intent = new Intent(getApplicationContext(), SecretDocsActivity.class);
-                intent.putExtra("Access", accessLevel);
+                Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
+                intent.putExtra(ACCESS_STRING, accessLevel);
+                intent.putExtra(EMAIL_STRING, mEmail);
                 startActivity(intent);
-                finish();
-
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -367,22 +359,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    /**
+    * Result from the sign-up activity will be stored in the App's shared preferences.
+    */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
+        super.onActivityResult(requestCode, resultCode, data);
+        // Check which request we're responding to.
         if (requestCode == REQUEST_SIGNUP) {
 
             if (resultCode == RESULT_OK) {
-                String srt = data.getStringExtra("Credentials");
-                for (String string : DUMMY_CREDENTIALS) {
-                    if (string.split(":")[0].equals(srt.split(":")[0])) {
-                        Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
-                        intent.putExtra("Again", 1);
-                        startActivityForResult(intent, REQUEST_SIGNUP);
-                        return;
-                    }
+                String[] credentials = data.getStringExtra(CREDENTIALS_STRING).split(":");
+                if (!sharedPref.getString(credentials[0], getString(R.string.default_string)).equals(getString(R.string.default_string))) {
+                    Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
+                    intent.putExtra(SIGNUP_REDO, 1);
+                    startActivityForResult(intent, REQUEST_SIGNUP);
+                    return;
                 }
-                DUMMY_CREDENTIALS.add(srt);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(credentials[0], credentials[1]+":"+credentials[2]);
+                editor.commit();
                 mEmailView.requestFocus();
                 Toast toast =
                   Toast.makeText(this, "Sign Up succesful! Please Log In to continue.", Toast.LENGTH_LONG);
