@@ -69,35 +69,34 @@ import androidx.appcompat.app.AppCompatActivity;
             Collection<AugmentedImage> updatedAugmentedImages =
                     frame.getUpdatedTrackables(AugmentedImage.class);
             for (AugmentedImage augmentedImage : updatedAugmentedImages) {
-                    switch (augmentedImage.getTrackingState()) {
-                        case PAUSED:
-                            // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
-                            // but not yet tracked.
-                            break;
+                switch (augmentedImage.getTrackingState()) {
+                    case PAUSED:
+                        // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
+                        // but not yet tracked.
+                        break;
 
-                        case TRACKING:
-                            // Have to switch to UI Thread to update View.
-                            fitToScanView.setVisibility(View.GONE);
-                            // Create a new anchor for newly found images.
-                            if (!augmentedImageMap.containsKey(augmentedImage)) {
-                                transformationSystem = arFragment.getTransformationSystem();
-                                AugmentedImageNode node = new AugmentedImageNode(this, transformationSystem, augmentedImage.getName(), accessLevel);
-                                node.setImage(augmentedImage);
-                                augmentedImageMap.put(augmentedImage, node);
-                                arFragment.getArSceneView().getScene().addChild(node);
-                            }
-                            break;
+                    case TRACKING:
+                        // Have to switch to UI Thread to update View.
+                        fitToScanView.setVisibility(View.GONE);
+                        // Create a new anchor for newly found images.
+                        if (!augmentedImageMap.containsKey(augmentedImage)) {
+                            transformationSystem = arFragment.getTransformationSystem();
+                            AugmentedImageNode node = new AugmentedImageNode(this, transformationSystem, augmentedImage.getName(), accessLevel);
+                            node.setImage(augmentedImage);
+                            augmentedImageMap.put(augmentedImage, node);
+                            arFragment.getArSceneView().getScene().addChild(node);
+                        }
+                        break;
 
-                        case STOPPED:
-                            AugmentedImageNode remNode = augmentedImageMap.get(augmentedImage);
-                            if (remNode != null) {
-                                arFragment.getArSceneView().getScene().removeChild(remNode);
-                                remNode.getAnchor().detach();
-                            }
-                            augmentedImageMap.remove(augmentedImage);
-                            break;
-                    }
-//                }
+                    case STOPPED:
+                        AugmentedImageNode remNode = augmentedImageMap.get(augmentedImage);
+                        if (remNode != null) {
+                            arFragment.getArSceneView().getScene().removeChild(remNode);
+                            remNode.getAnchor().detach();
+                        }
+                        augmentedImageMap.remove(augmentedImage);
+                        break;
+                }
             }
         }
     }
