@@ -32,25 +32,28 @@ public class AugmentedImageNode extends AnchorNode {
 
     private static final String TAG = "AugmentedImageNode";
 
-    // The augmented image represented by this node.
-    private AugmentedImage image;
+    /* The augmented image represented by this node. */
     private ImageView imgView;
 
-    private CompletableFuture<ViewRenderable> secret;
+    private CompletableFuture<ViewRenderable> secretDoc;
     private TransformationSystem transformationSystem;
     private ViewRenderable img;
 
     public AugmentedImageNode(Context context, TransformationSystem transformationSystem, String augmentedImage, int accessLevel) {
-        // Upon construction, start loading the models for the corners of the frame.
-        if (secret == null) {
+
+        /* Upon construction, start loading the document to be rendered. */
+        if (secretDoc == null) {
             String[] imageParams = augmentedImage.split(":");
             imgView = new ImageView(context);
+
+            /* Load document only if User has authorized access level. */
             if (Integer.parseInt(imageParams[1]) <= accessLevel) {
                 imgView.setImageBitmap(loadImageBitmap(context, imageParams[2]));
             } else {
-                imgView.setImageBitmap(loadImageBitmap(context, "default"));
+                imgView.setImageBitmap(loadImageBitmap(context, context.getString(R.string.default_string)));
             }
-            secret = ViewRenderable.builder()
+
+            secretDoc = ViewRenderable.builder()
                     .setView(context, imgView)
                     .setVerticalAlignment(ViewRenderable.VerticalAlignment.CENTER)
                     .setSizer(new FixedHeightViewSizer((float) 0.4))
@@ -67,11 +70,10 @@ public class AugmentedImageNode extends AnchorNode {
      */
     @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
     public void setImage(AugmentedImage image) {
-        this.image = image;
 
-        // If any of the models are not loaded, then recurse when all are loaded.
-        if (!secret.isDone()) {
-            CompletableFuture.allOf(secret)
+        /* If any of the models are not loaded, then recurse when all are loaded. */
+        if (!secretDoc.isDone()) {
+            CompletableFuture.allOf(secretDoc)
                     .thenAccept((Void aVoid) -> setImage(image))
                     .exceptionally(
                             throwable -> {
@@ -80,10 +82,10 @@ public class AugmentedImageNode extends AnchorNode {
                             });
         }
 
-        img = secret.getNow(null);
+        img = secretDoc.getNow(null);
 
+        /* Configure document to be displayed and its placement on the QRCode detected. */
         if (img != null) {
-            // Set the anchor based on the center of the image.
             setAnchor(image.createAnchor(image.getCenterPose()));
             TransformableNode andy = new TransformableNode(this.transformationSystem);
             andy.setParent(this);
@@ -97,18 +99,19 @@ public class AugmentedImageNode extends AnchorNode {
         }
     }
 
+    /* Load bitmap image uploaded by User and stored on device. */
     private Bitmap loadImageBitmap(Context context, String document) {
-        Log.e(TAG, "Loading document :"+document);
-        if (document.equals("default")) {
-            Log.e(TAG, "Loading default");
+
+        /* Load restricted access image if user doesn't have the access level. */
+        if (document.equals(context.getString(R.string.default_string))) {
             try (InputStream is = context.getAssets().open("RenderImages/doc0.png")) {
                 return BitmapFactory.decodeStream(is);
             } catch (IOException e) {
                 Log.e(TAG, "IO exception loading augmented image bitmap.", e);
             }
         }
+
         try (FileInputStream inputStream = context.openFileInput(context.getString(R.string.document_view) + ":" + document)) {
-            Log.e(TAG, "Loading original");
             return BitmapFactory.decodeStream(inputStream);
         } catch (IOException e) {
             Log.e(TAG, "IO exception loading augmented image bitmap.", e);

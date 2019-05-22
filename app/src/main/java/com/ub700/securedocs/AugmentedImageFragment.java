@@ -4,7 +4,6 @@ package com.ub700.securedocs;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,10 +48,6 @@ public class AugmentedImageFragment extends ArFragment {
 
         // Check for Sceneform being supported on this device.  This check will be integrated into
         // Sceneform eventually.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Log.e(TAG, "Sceneform requires Android N or later");
-        }
-
         String openGlVersionString =
                 ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
                         .getDeviceConfigurationInfo()
@@ -84,6 +79,7 @@ public class AugmentedImageFragment extends ArFragment {
         return config;
     }
 
+    /* Load Augmented image database from device storage (private to app). */
     private boolean setupAugmentedImageDatabase(Config config, Session session) {
         AugmentedImageDatabase augmentedImageDatabase = null;
 

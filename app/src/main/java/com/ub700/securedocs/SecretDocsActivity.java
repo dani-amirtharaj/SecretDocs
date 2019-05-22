@@ -18,10 +18,6 @@ import com.google.ar.sceneform.ux.TransformationSystem;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-/**
-     * This application demonstrates using augmented images to place anchor nodes. app to include image
-     * tracking functionality.
-     */
     public class SecretDocsActivity extends AppCompatActivity {
 
         private ArFragment arFragment;
@@ -29,8 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
         private TransformationSystem transformationSystem;
         private int accessLevel;
 
-        // Augmented image and its associated center pose anchor, keyed by the augmented image in
-        // the database.
+        /* Augmented image and its associated center pose anchor, keyed by the augmented image in the database. */
         private final Map<AugmentedImage, AugmentedImageNode> augmentedImageMap = new HashMap<>();
 
         @Override
@@ -38,9 +33,11 @@ import androidx.appcompat.app.AppCompatActivity;
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
+            /* Start ARSession by setting up sceneform's AR fragment. */
             arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-            fitToScanView = findViewById(R.id.image_view_fit_to_scan);
             arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
+
+            fitToScanView = findViewById(R.id.image_view_fit_to_scan);
 
             Intent intent = getIntent();
             accessLevel = intent.getExtras().getInt("Access");
@@ -54,15 +51,11 @@ import androidx.appcompat.app.AppCompatActivity;
             }
         }
 
-        /**
-         * Registered with the Sceneform Scene object, this method is called at the start of each frame.
-         *
-         * @param frameTime - time since last frame.
-         */
+        /* Called once everytime a frame is updated in the AR session. */
         private void onUpdateFrame(FrameTime frameTime) {
             Frame frame = arFragment.getArSceneView().getArFrame();
 
-            // If there is no frame or ARCore is not tracking yet, just return.
+            /* If there is no frame or ARCore is not tracking yet, just return. */
             if (frame == null || frame.getCamera().getTrackingState() != TrackingState.TRACKING) {
                 return;
             }
@@ -76,9 +69,10 @@ import androidx.appcompat.app.AppCompatActivity;
                         break;
 
                     case TRACKING:
-                        // Have to switch to UI Thread to update View.
+                        /* Have to switch to UI Thread to update View. */
                         fitToScanView.setVisibility(View.GONE);
-                        // Create a new anchor for newly found images.
+
+                        /* Create a new anchor for newly detected images. */
                         if (!augmentedImageMap.containsKey(augmentedImage)) {
                             transformationSystem = arFragment.getTransformationSystem();
                             AugmentedImageNode node = new AugmentedImageNode(this, transformationSystem, augmentedImage.getName(), accessLevel);
