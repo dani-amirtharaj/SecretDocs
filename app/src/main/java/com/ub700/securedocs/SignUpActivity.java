@@ -41,7 +41,7 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
- * A signup screen that offers signup via email/password.
+ * A signup screen that offers signup via Username (email address) and password.
  */
 public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
@@ -67,8 +67,8 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // Set up the signup form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        // Field to enter Email address.
+        mEmailView = findViewById(R.id.email);
         populateAutoComplete();
         if (getIntent().getExtras().getInt(SIGNUP_REDO) == 1) {
             Toast toast =
@@ -77,28 +77,25 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
             toast.show();
         }
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mRePasswordView = (EditText) findViewById(R.id.retype_password);
-        mRePasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+        // Fields to enter password and retyped password.
+        mPasswordView = findViewById(R.id.password);
+        mRePasswordView = findViewById(R.id.retype_password);
+        mRePasswordView.setOnEditorActionListener((TextView textView, int id, KeyEvent keyEvent) -> {
                 if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
                     attemptsignup();
                     return true;
                 }
                 return false;
-            }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.sign_up_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        // Button to complete signup form.
+        Button mEmailSignInButton = findViewById(R.id.sign_up_button);
+        mEmailSignInButton.setOnClickListener((View view) -> {
                 attemptsignup();
-            }
         });
 
-        mSpinnerView = (Spinner) findViewById(R.id.spinner);
+        // Drop down to choose access level of user registering.
+        mSpinnerView = findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.access_levels, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -124,7 +121,6 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         if (!mayRequestContacts()) {
             return;
         }
-
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -171,7 +167,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
      */
     private void attemptsignup() {
 
-        // Reset errors.
+        // Reset errors to default.
         mEmailView.setError(null);
         mPasswordView.setError(null);
         mRePasswordView.setError(null);
@@ -184,6 +180,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         boolean cancel = false;
         View focusView = null;
 
+        // Check if password matches retyped password.
         if (!TextUtils.equals(rePassword, password)) {
             mRePasswordView.setError(getString(R.string.password_dont_match));
             focusView = mRePasswordView;
@@ -324,7 +321,6 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
 
         mEmailView.setAdapter(adapter);
     }
-
 
     private interface ProfileQuery {
         String[] PROJECTION = {

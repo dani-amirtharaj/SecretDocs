@@ -5,8 +5,8 @@
     <string name="prompt_password">Password</string>
     <string name="prompt_reenter_password">Reenter Password</string>
     <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="action_sign_in_short">Authenticate</string>
+    <string name="error_invalid_email">This email address does not exist!</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">Email Id or password incorrect</string>
     <string name="error_field_required">This field is required</string>
@@ -29,6 +29,7 @@
     <string name="view_docs">View Document</string>
     <string name="again">Upload Another</string>
     <string name="default_string">Default</string>
+    <string name="button_selector">Button selector</string>
     <string-array name="access_levels">
         <item>Level 1</item>
         <item>Level 2</item>

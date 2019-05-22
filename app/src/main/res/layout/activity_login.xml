@@ -63,16 +63,19 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:visibility="gone"
+                    tools:visibility="gone" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/email_sign_in_button"
                 style="?android:textAppearanceSmall"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="35dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:text="@string/action_sign_in_short"
@@ -83,10 +86,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="25dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
                 android:text="@string/signup_suggestion"
+                android:textAlignment="center"
                 android:textColorLink="@color/colorPrimaryDark" />
 
         </LinearLayout>

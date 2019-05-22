@@ -25,14 +25,10 @@ import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +38,7 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
- * A login screen that offers login via email/password.
+ * A login screen that offers login via Username (email address) and AR authentication.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
@@ -58,7 +54,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // UI references.
     private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private TextView mSignUp;
@@ -67,7 +62,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final String CREDENTIALS_STRING = "Credentials";
     private static final String ACCESS_STRING = "Access";
     private static final String EMAIL_STRING = "Email";
+    private static final String KEY_STRING = "Key";
     private static final String SIGNUP_REDO = "Again";
+
+    // All User names and Passwords are stored here.
     private SharedPreferences sharedPref;
 
     @Override
@@ -75,39 +73,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        // Field to enter email address.
+        mEmailView = findViewById(R.id.email);
         populateAutoComplete();
 
+        // Field to request signup.
         mSignUp = findViewById(R.id.textView);
-        mSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mSignUp.setOnClickListener((View v) -> {
                 // Start the Signup activity
                 Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
                 intent.putExtra(SIGNUP_REDO, 0);
                 startActivityForResult(intent, REQUEST_SIGNUP);
-            }
         });
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        // Field to Authenticate user through AR lock.
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton.setOnClickListener((View view) -> {
                 attemptLogin();
-            }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
@@ -132,12 +114,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
             Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
+                    .setAction(android.R.string.ok, (View v) -> {
                             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
                     });
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
@@ -158,7 +136,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -171,25 +148,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Reset errors.
         mEmailView.setError(null);
-        mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
-
-        // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView;
-            cancel = true;
-        } else if (!isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
@@ -210,17 +174,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email);
             mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.length() > 4;
     }
 
     /**
@@ -314,41 +274,37 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Integer> {
+    public class UserLoginTask extends AsyncTask<Void, Void, String[]> {
 
         private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email) {
             mEmail = email;
-            mPassword = password;
         }
 
         @Override
-        protected Integer doInBackground(Void... params) {
-            // Return the access level if the User name and password are valid.
+        protected String[] doInBackground(Void... params) {
+            // Return the access level from the credentials stored, if the Username is valid.
             String[] credentials = sharedPref.getString(mEmail, getString(R.string.default_string)).split(":");
             if (!credentials[0].equals(getString(R.string.default_string))) {
-                if (credentials[0].equals(mPassword)) {
-                    return Integer.valueOf(credentials[1]);
-                }
+                    return credentials;
             }
-            return 0;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(final Integer accessLevel) {
+        protected void onPostExecute(final String[] credentials) {
             mAuthTask = null;
             showProgress(false);
-            // If authentication successful, start next activity.
-            if (accessLevel > 0) {
-                Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
-                intent.putExtra(ACCESS_STRING, accessLevel);
+            // If Username is valid, start next activity for AR authentication (AuthActivity).
+            if (credentials != null) {
+                Intent intent = new Intent(getApplicationContext(), AuthActivity.class);
+                intent.putExtra(ACCESS_STRING, Integer.parseInt(credentials[1]));
                 intent.putExtra(EMAIL_STRING, mEmail);
+                intent.putExtra(KEY_STRING, credentials[0]);
                 startActivity(intent);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                mEmailView.setError(getString(R.string.error_invalid_email));
+                mEmailView.requestFocus();
             }
         }
 
@@ -360,7 +316,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     /**
-    * Result from the sign-up activity will be stored in the App's shared preferences.
+    * Result from the sign-up activity (accepted Username and key)
+    * will be stored in the App's shared preferences.
     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -370,12 +327,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (resultCode == RESULT_OK) {
                 String[] credentials = data.getStringExtra(CREDENTIALS_STRING).split(":");
+
+                // If Username already exists, singup again.
                 if (!sharedPref.getString(credentials[0], getString(R.string.default_string)).equals(getString(R.string.default_string))) {
                     Intent intent = new Intent(getApplicationContext(), SignUpActivity.class);
                     intent.putExtra(SIGNUP_REDO, 1);
                     startActivityForResult(intent, REQUEST_SIGNUP);
                     return;
                 }
+                // Else store credentials from signup into sharedPreferences.
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString(credentials[0], credentials[1]+":"+credentials[2]);
                 editor.commit();
@@ -386,7 +346,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
               toast.show();
             }
             else{
-                Log.e("Login", "Error");
+                Toast toast =
+                        Toast.makeText(this, "Sign Up unsuccesful!", Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP, 0, 250);
+                toast.show();
+                Log.e(this.getClass().toString(), "Login Error");
             }
         }
     }
