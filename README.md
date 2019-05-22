@@ -21,7 +21,7 @@ Activity which allows the user to enter a valid email address (with a '@' charac
 
 * **AuthActivity**
 
-Activity which provides AR authentication. The authentication mechanism is borrowed from https://github.com/dani-amirtharaj/AR-Lock. Once the key entered by the user matches their password, the next activity, MenuActivity is started, and this activity is finished. If the user exceeds the 32 character limit or 5 retries, the actvity finishes, with a message explaining it was unable to authenticate the user.
+Activity which provides AR authentication. The authentication mechanism is borrowed from https://github.com/dani-amirtharaj/AR-Lock. Here, the keypad is setup mid-air. Once the key entered by the user matches their password, the next activity, MenuActivity is started, and this activity is finished. If the user exceeds the 32 character limit or 5 retries, the actvity finishes, with a message explaining it was unable to authenticate the user.
 
 * **MenuActivity**
 
