@@ -30,7 +30,7 @@ The app is made of 6 activities. The function of each activity is described belo
 * Activity which allows the user to enter a valid email address (with a '@' character), a numeric password and retype the numeric password. 
 * On completion, the user may click the sign up button which finishes this activity and sends results (credentials accepted) to the calling (Login) activity.
 
-* **AuthActivity**
+### AuthActivity
 
 * Activity which provides AR authentication. The authentication mechanism is borrowed from https://github.com/dani-amirtharaj/AR-Lock. Here, the keypad is setup mid-air. 
 * Once the key entered by the user matches their password, the next activity, MenuActivity is started, and this activity is finished.
