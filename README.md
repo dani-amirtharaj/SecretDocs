@@ -20,12 +20,12 @@ https://photos.app.goo.gl/vP1o2vTDhqf9SNQCA
 
 The app is made of 6 activities. The function of each activity is described below.
 
-* **LoginActivity**
+### LoginActivity
 
 * Launcher activity which takes in a valid Username (email address with '@' character) of the user, and allows the user to authenticate themselves by clicking on the Authenticate button (starts the authentication activity). 
 * There is also an option for new users to signup, this starts the signup activity.
 
-* **SignUpActivity**
+### SignUpActivity
 
 * Activity which allows the user to enter a valid email address (with a '@' character), a numeric password and retype the numeric password. 
 * On completion, the user may click the sign up button which finishes this activity and sends results (credentials accepted) to the calling (Login) activity.
@@ -36,13 +36,13 @@ The app is made of 6 activities. The function of each activity is described belo
 * Once the key entered by the user matches their password, the next activity, MenuActivity is started, and this activity is finished.
 * If the user exceeds the 32 character limit or 5 retries, the actvity finishes, with a message explaining it was unable to authenticate the user.
 
-* **MenuActivity**
+### MenuActivity
 
 * Activity which allows the user to upload documents (image files) or view existing documents that have already been uploaded and have QR codes generated (starts the SecretDocsActivity). 
 * Once a document is uploaded by the user with a specific access level, a QRCode is generated and stored in ARCore's augmented image database (used to detect the QR codes in an AR session, for viewing the secret documents in the next activity).
 * The QR code is attached in a pre-generated email (using Android's ACTION_SEND intent) that the user may share with themselves or other users.
 
-* **SecretDocsActivity**
+### SecretDocsActivity
 
 * Activity that starts an ARCore session and displays virtual documents on top of QR codes. 
 * It sets up an AR fragment (AugmentedImageFragment) first (which internally starts the AR session and takes care of UI) and loads the augmented image database, and starts detecting QR codes that were stored in the augmented image database.
