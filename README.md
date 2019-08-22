@@ -2,6 +2,7 @@
 
 Augmented Reality Android application that authenticates a user, allows a user to upload confidential documents with specified access and displays confidential documents based on the user's authorization and access levels.
 
+
 ## Brief Description
 
 * The User first signs up, by selecting an access level (in a production system, an administrator will need to approve such a request). * Once signed up, the user can enter their Username (email address) and click authenticate. 
