@@ -2,6 +2,9 @@
 
 Augmented Reality Android application that authenticates a user, allows a user to upload confidential documents with specified access and displays confidential documents based on the user's authorization and access levels.
 
+## Demo
+
+https://photos.app.goo.gl/vP1o2vTDhqf9SNQCA
 
 ## Brief Description
 
@@ -12,10 +15,6 @@ Augmented Reality Android application that authenticates a user, allows a user t
 * When a User uploads a document, they will be able to send a QR code over email (required to view the document later), and can continue to upload more documents or move on to viewing documents. 
 * In order to view a document, if the User has the required access level, they can focus the QR code and fit it in the square box displayed on screen. 
 * The app retrieves the document to be displayed and renders the document on top of this QR code. If the User doesn't have the access level, a restricted access image is displayed. 
-
-## Demo
-
-https://photos.app.goo.gl/vP1o2vTDhqf9SNQCA
 
 ## Code Overview 
 
